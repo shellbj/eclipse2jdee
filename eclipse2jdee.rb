@@ -69,8 +69,8 @@ filename = "jdee_prj.template"
 template = ERB.new(IO.read(File.join(template_dir, filename)), 0, "%<>")
 
 jde_project_name = project_name
-jde_sourcepath = sourcepath_elements
-jde_global_classpath = classpath_elements
+jde_sourcepath = sourcepath_elements.sort.uniq
+jde_global_classpath = classpath_elements.sort.uniq
 jde_compile_option_directory = compile_output
 jde_build_function = "jde-ant-build"
 jde_ant_program = "./build.sh"
