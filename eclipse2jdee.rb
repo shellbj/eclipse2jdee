@@ -7,7 +7,7 @@ include REXML
 
 
 force_overwrite = false
-basedir = File.dirname($0)
+basedir = Pathname.new(File.dirname(Pathname.new(".").realpath))
 
 OptionParser.new do |opts|
   opts.banner = "Usage #$0 [options] [classpath-file] [project-file]"
@@ -18,7 +18,7 @@ OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Specific options:"
   opts.on("-f", "--force", "Overwrite any exisiting configuration") {force_overwrite = true}
-  opts.on("-b", "--basedir b", "Root of the project if not the current working dir") {|b| basedir = b}
+  opts.on("-b", "--basedir b", "Root of the project if not the current working dir") {|b| basedir = Pathname.new(File.dirname(Pathname.new(b).realpath))}
 
   opts.on("-h", "--help", "Prints this message") { puts opts; exit }
 end.parse!
@@ -30,13 +30,12 @@ if classpath.nil?
   exit 1
 end
 
-def get_attribute_value_from_elements(doc, xpath, key)
+def get_attribute_value_from_elements(doc, xpath, key, basedir)
   elements = []
   doc.elements.each(xpath) do |xml|
     if !xml.attributes[key].nil?
-      pwd = Pathname.new(Pathname.new(".").realpath)
       path = Pathname.new(Pathname.new(xml.attributes[key]).realpath)
-      elements << File.join(".", path.relative_path_from(pwd))
+      elements << File.join(".", path.relative_path_from(basedir))
     end
   end
   elements
@@ -44,13 +43,13 @@ end
 
 classpath_doc = Document.new(File.new(classpath))
 
-classpath_elements = get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="lib"]', "path")
+classpath_elements = get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="lib"]', "path", basedir)
 
-sourcepath_elements = get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="src"]', "path")
+sourcepath_elements = get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="src"]', "path", basedir)
 
-get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="lib"]', "sourcepath").each { |e| sourcepath_elements << e }
+get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="lib"]', "sourcepath", basedir).each { |e| sourcepath_elements << e }
 
-compile_output = get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="output"]', "path")
+compile_output = get_attribute_value_from_elements(classpath_doc, '/classpath/classpathentry[@kind="output"]', "path", basedir)
 
 compile_output.each { |e| classpath_elements << e }
 
