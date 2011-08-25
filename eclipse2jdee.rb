@@ -7,7 +7,8 @@ include REXML
 
 
 force_overwrite = false
-basedir = Pathname.new(File.dirname(Pathname.new(".").realpath))
+basedir = Pathname.new(Pathname.new(".").realpath)
+project_file_name = "prj.el"
 
 OptionParser.new do |opts|
   opts.banner = "Usage #$0 [options] [classpath-file] [project-file]"
@@ -18,7 +19,7 @@ OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Specific options:"
   opts.on("-f", "--force", "Overwrite any exisiting configuration") {force_overwrite = true}
-  opts.on("-b", "--basedir b", "Root of the project if not the current working dir") {|b| basedir = Pathname.new(File.dirname(Pathname.new(b).realpath))}
+  opts.on("-b", "--basedir b", "Root of the project if not the current working dir") {|b| basedir = Pathname.new(Pathname.new(b).realpath)}
 
   opts.on("-h", "--help", "Prints this message") { puts opts; exit }
 end.parse!
@@ -79,5 +80,11 @@ jde_ant_read_target = "t"
 jde_jdk = "1.6"
 jde_db_option_connect_socket = "5005"
 
-puts template.result
+project_file = File.join(basedir, project_file_name)
+if force_overwrite or !File.exists?(project_file)
+  puts "Writing new project file to #{project_file}"
+  File.open(project_file, "w") { |f| f.puts(template.result) }
+else
+  puts "Project file exisits, #{project_file}, doing nothing"
+end
 
