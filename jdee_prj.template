@@ -1,0 +1,30 @@
+(jde-project-file-version "1.0")
+(jde-set-variables
+        '(jde-project-root 't)
+% if !jde_project_name.nil?
+        '(jde-project-name '<%= jde_project_name %>)
+% end
+% if !jde_build_function.nil?
+        '(jde-build-function '<%= jde_build_function %>)
+% end
+% if !jde_ant_program.nil?
+        '(jde-ant-program "./build.sh")
+        '(jde-ant-enable-find '<%= jde_ant_enable_find %>)
+        '(jde-ant-read-target '<%= jde_ant_read_target %>)
+% end
+% if !jde_jdk.nil?
+        '(jde-jdk (quote ("<%= jde_jdk %>")))
+% end
+        '(jde-db-option-connect-socket '(nil "<%= jde_db_option_connect_socket %>"))
+        '(jde-compile-option-directory "<%= jde_compile_option_directory %>")
+        '(jde-sourcepath (quote (
+% jde_sourcepath.each do |path|
+                                "<%= path %>"
+% end
+                         )))
+        '(jde-global-classpath (quote (
+% jde_global_classpath.each do |path|
+                                "<%= path %>"
+% end
+                         )))
+)
