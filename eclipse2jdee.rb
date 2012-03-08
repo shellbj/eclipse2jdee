@@ -59,10 +59,18 @@ if classpath.nil?
 end
 
 def get_attribute_value_from_elements(doc, xpath, key, basedir)
+  get_attribute_value_from_elements_l(doc, xpath, key, basedir, nil)
+end
+
+def get_attribute_value_from_elements_l(doc, xpath, key, basedir, lambda)
   elements = []
   doc.elements.each(xpath) do |xml|
     if !xml.attributes[key].nil?
-      path = Pathname.new(Pathname.new(xml.attributes[key]).realpath)
+      xml_attrib = xml.attributes[key]
+      if !lambda.nil?
+        xml_attrib = lambda.call(xml_attrib)
+      end
+      path = Pathname.new(File.expand_path(xml_attrib)).realpath
       elements << File.join(".", path.relative_path_from(basedir))
     end
   end
@@ -81,7 +89,11 @@ compile_output = get_attribute_value_from_elements(classpath_doc, '/classpath/cl
 
 compile_output.each { |e| classpath_elements << e }
 
-project_name = nil
+variable_elements = get_attribute_value_from_elements_l(classpath_doc, '/classpath/classpathentry[@kind="var"]', "path", basedir, Proc.new{ |e| e.gsub('M2_REPO', '~/.m2/repository') })
+
+variable_elements.each { |e| classpath_elements << e }
+
+Project_name = nil
 
 project = ARGV[1]
 project_doc = nil
